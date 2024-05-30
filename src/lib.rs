@@ -164,7 +164,7 @@ use time::OffsetDateTime;
 
 #[cfg(feature = "blocking")]
 use reqwest::blocking::{Client, ClientBuilder};
-use reqwest::StatusCode;
+use reqwest::{header::HeaderMap, StatusCode};
 #[cfg(not(feature = "blocking"))]
 use reqwest::{Client, ClientBuilder};
 
@@ -248,10 +248,8 @@ impl Default for YahooConnector {
 
 impl YahooConnectorBuilder {
     pub fn build(self) -> Result<YahooConnector, YahooError> {
-        let builder = Client::builder();
-
         Ok(YahooConnector {
-            client: builder.build()?,
+            client: self.inner.build()?,
             url: YCHART_URL,
             search_url: YSEARCH_URL,
         })
@@ -260,6 +258,11 @@ impl YahooConnectorBuilder {
     pub fn timeout(mut self, timeout: Duration) -> Self {
         self.inner = self.inner.timeout(timeout);
 
+        self
+    }
+
+    pub fn default_headers(mut self, headers: HeaderMap) -> Self {
+        self.inner = self.inner.default_headers(headers);
         self
     }
 }
